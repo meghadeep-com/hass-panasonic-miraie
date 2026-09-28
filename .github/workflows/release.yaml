@@ -20,6 +20,17 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           fetch-depth: 0
 
+      - name: Check Tag Is At The Tip Of Main
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git fetch origin main
+          main=$(git rev-parse FETCH_HEAD)
+          if [ "$(git rev-parse HEAD)" != "$main" ]; then
+            echo "::error::$TAG is at $(git rev-parse --short HEAD) but main is at $(git rev-parse --short "$main"). This job pushes to main and moves the tag, so the tag must be cut at main's tip."
+            exit 1
+          fi
+
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
@@ -41,6 +52,18 @@ jobs:
           git push origin HEAD:main
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # The tag was cut before the version sync, so it points at a tree whose
+      # manifest.json still carries the old version -- which is what HACS reads
+      # when it installs from the tag rather than the release asset. Move it
+      # onto the sync commit. Pushes made with GITHUB_TOKEN do not start new
+      # workflow runs, so this does not re-trigger the job.
+      - name: Move Tag Onto The Version Sync Commit
+        env:
+          TAG: ${{ github.ref_name }}
+        run: |
+          git tag -f -a "$TAG" -m "Release $TAG"
+          git push --force origin "refs/tags/$TAG"
 
       - name: Fetch Latest Main
         run: |
