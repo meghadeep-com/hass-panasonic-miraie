@@ -250,7 +250,9 @@ class PanasonicMirAIeClimate(ClimateEntity):
         """
         await super().async_will_remove_from_hass()
         try:
-            await self._api.mqtt_handler.unsubscribe(f"{self._device_topic}/state")
+            await self._api.mqtt_handler.unsubscribe(
+                f"{self._device_topic}/state", self._handle_state_update
+            )
         except Exception as e:
             _LOGGER.error("Error unsubscribing %s: %s", self._attr_name, e)
 

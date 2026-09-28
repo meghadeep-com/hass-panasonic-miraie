@@ -526,6 +526,22 @@ class PanasonicMirAIeAPI:
         result = await self.mqtt_handler.publish(f"{device_topic}/control", payload)
         return result
 
+    async def set_feature(self, device_topic: str, key: str, value):
+        """Set a single device field.
+
+        The firmware drops keys when several are sent in one payload, so each
+        field is published on its own.
+
+        Args:
+            device_topic: The MQTT topic for the device.
+            key: The MirAIe field name, e.g. "acpm" or "bzr".
+            value: The value to set, already in the device's expected type.
+
+        """
+        payload = self._get_base_payload()
+        payload.update({key: value})
+        return await self.mqtt_handler.publish(f"{device_topic}/control", payload)
+
     def _get_base_payload(self):
         """Get the base payload for MQTT messages.
 

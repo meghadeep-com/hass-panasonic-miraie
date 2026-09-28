@@ -17,7 +17,7 @@ from .services import async_setup_services, async_unload_services
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORMS: list[str] = ["climate"]
+PLATFORMS: list[str] = ["climate", "switch", "number", "sensor"]
 
 CONFIG_SCHEMA = cv.config_entry_only_config_schema(DOMAIN)
 

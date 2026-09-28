@@ -246,8 +246,7 @@ class MQTTHandler:
             payload_dict = json.loads(message.payload.decode())
             topic_str = str(message.topic)
 
-            if topic_str in self.subscriptions:
-                callback = self.subscriptions[topic_str]
+            for callback in list(self.subscriptions.get(topic_str, [])):
                 await self.hass.async_add_job(callback, topic_str, payload_dict)
         except json.JSONDecodeError:
             _LOGGER.error("Failed to decode MQTT message: %s", message.payload)
@@ -334,7 +333,13 @@ class MQTTHandler:
 
         """
         _LOGGER.debug("Attempting to subscribe to topic: %s", topic)
-        self.subscriptions[topic] = callback
+        # Several entities (climate, switches, sensors) share one device topic,
+        # so every subscriber has to be kept, not just the most recent one.
+        already_subscribed = topic in self.subscriptions
+        self.subscriptions.setdefault(topic, []).append(callback)
+
+        if already_subscribed:
+            return
 
         if self.connected.is_set():
             try:
@@ -354,14 +359,23 @@ class MQTTHandler:
                 topic,
             )
 
-    async def unsubscribe(self, topic: str):
+    async def unsubscribe(self, topic: str, callback: Callable | None = None):
         """Unsubscribe from an MQTT topic.
 
         Args:
             topic: The MQTT topic to unsubscribe from.
+            callback: The specific callback to drop. When omitted every
+                subscriber for the topic is removed.
 
         """
         _LOGGER.debug("Attempting to unsubscribe from topic: %s", topic)
+        if callback is not None:
+            callbacks = self.subscriptions.get(topic, [])
+            if callback in callbacks:
+                callbacks.remove(callback)
+            if callbacks:
+                # Other entities still need this topic.
+                return
         self.subscriptions.pop(topic, None)
 
         if self.connected.is_set():
