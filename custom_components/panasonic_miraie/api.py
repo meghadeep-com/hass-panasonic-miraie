@@ -373,6 +373,10 @@ class PanasonicMirAIeAPI:
             "acem": data.get("acem"),
             "cnv": cnv_value,  # Include raw value
             "accm": cnv_str_value,  # Use string value for compatibility
+            "acdc": data.get("acdc"),
+            "bzr": data.get("bzr"),
+            "rssi": data.get("rssi"),
+            "totalOperatingHours": data.get("totalOperatingHours"),
             "ts": data.get("ts"),
             "errors": data.get("errors"),
             "warnings": data.get("warnings"),

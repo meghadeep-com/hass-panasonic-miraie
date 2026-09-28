@@ -61,13 +61,27 @@ async def async_setup_entry(
     api = hass.data[DOMAIN][config_entry.entry_id]
     devices = await async_get_device_list(api)
 
-    entities = [
-        PanasonicMirAIeSwitch(api, topic, device["deviceName"], device["deviceId"], desc)
-        for device in devices
-        for topic in [device["topic"][0] if device["topic"] else None]
-        if topic
-        for desc in SWITCHES
-    ]
+    entities = []
+    for device in devices:
+        topic = device["topic"][0] if device["topic"] else None
+        if not topic:
+            continue
+        try:
+            state = await api.get_device_state(device["deviceId"])
+        except Exception as err:  # noqa: BLE001
+            _LOGGER.debug(
+                "Could not read %s while adding switches: %s", device["deviceId"], err
+            )
+            state = {}
+        for desc in SWITCHES:
+            # Older models lack some fields entirely, e.g. no buzzer on 130180.
+            if state and state.get(desc.key) is None:
+                continue
+            entities.append(
+                PanasonicMirAIeSwitch(
+                    api, topic, device["deviceName"], device["deviceId"], desc
+                )
+            )
 
     if entities:
         async_add_entities(entities)
