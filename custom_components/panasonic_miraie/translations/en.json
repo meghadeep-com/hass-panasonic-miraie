@@ -31,14 +31,14 @@
               "economy": "Economy",
               "nanoe_powerful": "Nanoe + Powerful",
               "nanoe_economy": "Nanoe + Economy",
-              "converti7_hc": "Converti7 HC",
-              "converti7_fc": "Converti7 FC",
-              "converti7_90": "Converti7 90%",
-              "converti7_80": "Converti7 80%",
-              "converti7_70": "Converti7 70%",
-              "converti7_55": "Converti7 55%",
-              "converti7_40": "Converti7 40%",
-              "converti7_off": "Converti7 Off",
+              "converti7_hc": "Converti HC",
+              "converti7_fc": "Converti FC",
+              "converti7_90": "Converti 90%",
+              "converti7_80": "Converti 80%",
+              "converti7_70": "Converti 70%",
+              "converti7_55": "Converti 55%",
+              "converti7_40": "Converti 40%",
+              "converti7_off": "Converti Off",
               "clean": "Clean"
             }
           }

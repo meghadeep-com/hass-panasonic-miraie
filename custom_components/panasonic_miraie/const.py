@@ -58,20 +58,20 @@ PRESET_MODES = {
         "icon": "mdi:leaf-circle-outline",
     },
     PRESET_CONVERTI7_HC: {
-        "name": "Converti7 HC",
+        "name": "Converti HC",
         "icon": "mdi:arrow-up-bold-hexagon-outline",
     },
     PRESET_CONVERTI7_FC: {
-        "name": "Converti7 FC",
+        "name": "Converti FC",
         "icon": "mdi:arrow-up-bold-box-outline",
     },
-    PRESET_CONVERTI7_90: {"name": "Converti7 90%", "icon": "mdi:fraction-one-half"},
-    PRESET_CONVERTI7_80: {"name": "Converti7 80%", "icon": "mdi:fraction-one-half"},
-    PRESET_CONVERTI7_70: {"name": "Converti7 70%", "icon": "mdi:fraction-one-half"},
-    PRESET_CONVERTI7_55: {"name": "Converti7 55%", "icon": "mdi:fraction-one-half"},
-    PRESET_CONVERTI7_40: {"name": "Converti7 40%", "icon": "mdi:fraction-one-half"},
+    PRESET_CONVERTI7_90: {"name": "Converti 90%", "icon": "mdi:fraction-one-half"},
+    PRESET_CONVERTI7_80: {"name": "Converti 80%", "icon": "mdi:fraction-one-half"},
+    PRESET_CONVERTI7_70: {"name": "Converti 70%", "icon": "mdi:fraction-one-half"},
+    PRESET_CONVERTI7_55: {"name": "Converti 55%", "icon": "mdi:fraction-one-half"},
+    PRESET_CONVERTI7_40: {"name": "Converti 40%", "icon": "mdi:fraction-one-half"},
     PRESET_CONVERTI7_OFF: {
-        "name": "Converti7 Off",
+        "name": "Converti Off",
         "icon": "mdi:power-plug-off-outline",
     },
 }
