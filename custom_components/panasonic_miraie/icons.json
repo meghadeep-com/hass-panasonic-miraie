@@ -21,6 +21,28 @@
               "converti7_40": "mdi:numeric-4-circle",
               "converti7_off": "mdi:power-plug-off-outline"
             }
+          },
+          "swing_mode": {
+            "default": "mdi:arrow-expand-vertical",
+            "state": {
+              "swing": "mdi:arrow-up-down-bold-outline",
+              "position 1": "mdi:arrow-up-bold",
+              "position 2": "mdi:arrow-up",
+              "position 3": "mdi:arrow-expand-vertical",
+              "position 4": "mdi:arrow-down",
+              "position 5": "mdi:arrow-down-bold"
+            }
+          },
+          "swing_horizontal_mode": {
+            "default": "mdi:arrow-expand-horizontal",
+            "state": {
+              "swing": "mdi:arrow-left-right-bold-outline",
+              "position 1": "mdi:arrow-collapse-horizontal",
+              "position 2": "mdi:arrow-left-bold",
+              "position 3": "mdi:arrow-left",
+              "position 4": "mdi:arrow-right",
+              "position 5": "mdi:arrow-right-bold"
+            }
           }
         }
       }
