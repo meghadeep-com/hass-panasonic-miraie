@@ -15,11 +15,6 @@ from homeassistant.components.climate.const import (
     FAN_HIGH,
     FAN_LOW,
     FAN_MEDIUM,
-    SWING_BOTH,
-    SWING_HORIZONTAL,
-    SWING_OFF,
-    SWING_ON,
-    SWING_VERTICAL,
     ClimateEntityFeature,
     HVACMode,
 )
@@ -51,6 +46,7 @@ from .const import (
     PRESET_NANOE_POWERFUL,
     PRESET_NONE,
     PRESET_POWERFUL,
+    SWING_POSITION_MAP,
 )
 from .decorators.track_command import _track_command
 
@@ -73,13 +69,7 @@ FAN_MODE_MAP = {
     "quiet": FAN_DIFFUSE,
 }
 
-SWING_MODE_MAP = {
-    SWING_OFF: "3",
-    SWING_ON: "0",
-    SWING_VERTICAL: "0",
-    SWING_HORIZONTAL: "0",
-    SWING_BOTH: "0",
-}
+SWING_LABEL_BY_VALUE = {v: k for k, v in SWING_POSITION_MAP.items()}
 
 
 async def async_setup_entry(
@@ -147,7 +137,8 @@ class PanasonicMirAIeClimate(ClimateEntity):
     _attr_hvac_modes = list(HVAC_MODE_MAP.values())
     _attr_hvac_mode = HVACMode.OFF
     _attr_fan_modes = list(FAN_MODE_MAP.values())
-    _attr_swing_modes = list(SWING_MODE_MAP.keys())
+    _attr_swing_modes = list(SWING_POSITION_MAP)
+    _attr_swing_horizontal_modes = list(SWING_POSITION_MAP)
     _attr_preset_modes = list(PRESET_MODES.keys())
     _attr_translation_key = "panasonic_miraie"
     _update_lock = asyncio.Lock()
@@ -187,6 +178,7 @@ class PanasonicMirAIeClimate(ClimateEntity):
             ClimateEntityFeature.TARGET_TEMPERATURE
             | ClimateEntityFeature.FAN_MODE
             | ClimateEntityFeature.SWING_MODE
+            | ClimateEntityFeature.SWING_HORIZONTAL_MODE
             | ClimateEntityFeature.TURN_ON
             | ClimateEntityFeature.TURN_OFF
             | ClimateEntityFeature.PRESET_MODE
@@ -326,17 +318,14 @@ class PanasonicMirAIeClimate(ClimateEntity):
             payload: The state payload containing swing mode data.
 
         """
-        vertical_swing = payload.get("acvs")
-        horizontal_swing = payload.get("achs")
+        vertical = payload.get("acvs")
+        horizontal = payload.get("achs")
 
-        if vertical_swing == "0" and horizontal_swing == "0":
-            self._attr_swing_mode = SWING_BOTH
-        elif vertical_swing == "0":
-            self._attr_swing_mode = SWING_VERTICAL
-        elif horizontal_swing == "0":
-            self._attr_swing_mode = SWING_HORIZONTAL
-        else:
-            self._attr_swing_mode = SWING_OFF
+        # The device reports louver position as an int (0 = swing, 1-5 fixed).
+        if vertical is not None:
+            self._attr_swing_mode = SWING_LABEL_BY_VALUE.get(int(vertical))
+        if horizontal is not None:
+            self._attr_swing_horizontal_mode = SWING_LABEL_BY_VALUE.get(int(horizontal))
 
     def _update_preset_mode(
         self,
@@ -665,18 +654,62 @@ class PanasonicMirAIeClimate(ClimateEntity):
         self._attr_swing_mode = swing_mode
         self.async_write_ha_state()
 
-        miraie_swing_mode = SWING_MODE_MAP.get(swing_mode)
-        if miraie_swing_mode:
-            success = await self._send_command(
-                self._api.set_swing_mode, self._device_topic, miraie_swing_mode
-            )
+        position = SWING_POSITION_MAP.get(swing_mode)
+        if position is None:
+            _LOGGER.warning("Unknown swing mode %s for %s", swing_mode, self._attr_name)
+            return
 
-            if not success:
-                _LOGGER.warning(
-                    "Failed to set swing mode for %s after retries", self._attr_name
-                )
-                # Schedule an update to get the correct state
-                self.async_schedule_update_ha_state(True)
+        success = await self._send_command(
+            self._api.set_swing_mode, self._device_topic, position
+        )
+
+        if not success:
+            _LOGGER.warning(
+                "Failed to set swing mode for %s after retries", self._attr_name
+            )
+            # Schedule an update to get the correct state
+            self.async_schedule_update_ha_state(True)
+
+    @_track_command
+    async def async_set_swing_horizontal_mode(self, swing_horizontal_mode: str) -> None:
+        """Set new target horizontal louver position.
+
+        Args:
+            swing_horizontal_mode: The new horizontal swing mode to set.
+
+        Returns:
+            None
+
+        """
+        _LOGGER.debug(
+            "Setting horizontal swing mode for %s to %s",
+            self._attr_name,
+            swing_horizontal_mode,
+        )
+
+        # Update state optimistically
+        self._attr_swing_horizontal_mode = swing_horizontal_mode
+        self.async_write_ha_state()
+
+        position = SWING_POSITION_MAP.get(swing_horizontal_mode)
+        if position is None:
+            _LOGGER.warning(
+                "Unknown horizontal swing mode %s for %s",
+                swing_horizontal_mode,
+                self._attr_name,
+            )
+            return
+
+        success = await self._send_command(
+            self._api.set_swing_horizontal_mode, self._device_topic, position
+        )
+
+        if not success:
+            _LOGGER.warning(
+                "Failed to set horizontal swing mode for %s after retries",
+                self._attr_name,
+            )
+            self.async_schedule_update_ha_state(True)
 
     @_track_command
     async def _handle_converti7_preset(self, preset_mode: str) -> bool:

@@ -429,16 +429,28 @@ class PanasonicMirAIeAPI:
         payload.update({"acfs": fan_mode})
         return await self.mqtt_handler.publish(f"{device_topic}/control", payload)
 
-    async def set_swing_mode(self, device_topic: str, swing_mode: str):
-        """Set the swing mode of a device.
+    async def set_swing_mode(self, device_topic: str, position: int):
+        """Set the vertical louver position of a device.
 
         Args:
             device_topic: The MQTT topic for the device.
-            swing_mode: The desired swing mode.
+            position: 0 for continuous swing, 1-5 for a fixed position.
 
         """
         payload = self._get_base_payload()
-        payload.update({"acvs": swing_mode})
+        payload.update({"acvs": int(position)})
+        return await self.mqtt_handler.publish(f"{device_topic}/control", payload)
+
+    async def set_swing_horizontal_mode(self, device_topic: str, position: int):
+        """Set the horizontal louver position of a device.
+
+        Args:
+            device_topic: The MQTT topic for the device.
+            position: 0 for continuous swing, 1-5 for a fixed position.
+
+        """
+        payload = self._get_base_payload()
+        payload.update({"achs": int(position)})
         return await self.mqtt_handler.publish(f"{device_topic}/control", payload)
 
     async def set_nanoe(self, device_topic: str, state: bool):

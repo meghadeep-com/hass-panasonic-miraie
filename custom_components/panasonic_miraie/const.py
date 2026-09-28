@@ -11,6 +11,19 @@ MIRAIE_BROKER_HOST = "mqtt.miraie.in"
 MIRAIE_BROKER_PORT = 8883
 MIRAIE_BROKER_USE_SSL = True
 
+# Louver positions, shared by vertical (acvs) and horizontal (achs) swing.
+# 0 = continuous swing, 1-5 = fixed positions. The firmware silently discards
+# string-typed louver values, so these must stay ints all the way to MQTT.
+SWING_SWING = "swing"
+SWING_POSITION_MAP = {
+    SWING_SWING: 0,
+    "position 1": 1,
+    "position 2": 2,
+    "position 3": 3,
+    "position 4": 4,
+    "position 5": 5,
+}
+
 # Preset mode constants
 PRESET_NONE = "none"
 PRESET_NANOE = "nanoe"
