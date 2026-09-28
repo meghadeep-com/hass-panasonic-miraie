@@ -2,7 +2,7 @@
 
 This integration allows you to control your Panasonic MirAIe air conditioners through Home Assistant using the official MirAIe API and MQTT protocol.
 
-<a href="https://www.buymeacoffee.com/chrissmartin" target="_blank"><img src="https://cdn.buymeacoffee.com/buttons/default-orange.png" alt="Buy Me A Coffee" height="41" width="174"></a>
+This is a maintained fork of [chrissmartin/hass-panasonic-miraie](https://github.com/chrissmartin/hass-panasonic-miraie), which has been inactive since May 2025. It carries fixes and features that were never merged upstream — most notably working louver control, which had never functioned.
 
 ## Features
 
@@ -10,12 +10,12 @@ This integration allows you to control your Panasonic MirAIe air conditioners th
 - Set target temperature
 - Change operation modes (Auto, Cool, Heat, Dry, Fan Only)
 - Adjust fan speed (Auto, Low, Medium, High, Quiet)
-- Control swing mode (Off, Vertical, Horizontal, Both)
+- Positional louver control, vertical and horizontal — continuous swing or one of five fixed positions
 - Monitor current room temperature
-- View and control additional features:
-  - NanoeTM X (On/Off) - controllable via preset modes and service
-  - Powerful mode (On/Off) - controllable via preset modes and service
-  - Economy mode (On/Off) - controllable via preset modes and service
+- Independent switches for Powerful, Eco mode, Clean, Display and Buzzer
+- Converti capacity limit (0–110%) as a number entity — note the AC only accepts this in cool mode
+- Nanoe X, where the model supports it, via preset modes and services
+- Diagnostics: WiFi signal, filter dust level, total operating hours (model dependent)
 - Monitor filter status:
   - Dust level
   - Cleaning required indicator
@@ -49,7 +49,7 @@ If you haven't installed HACS yet, follow the [official installation guide](http
 6. In the **Add custom repository URL** field, enter:
 
    ```url
-   https://github.com/chrissmartin/hass-panasonic-miraie
+   https://github.com/meghadeep-com/hass-panasonic-miraie
    ```
 
 7. In the **Category** dropdown, select **Integration**.
@@ -204,7 +204,9 @@ data:
 
 ## Contributing
 
-Contributions to improve the integration are welcome! Please feel free to submit pull requests or open issues for any bugs or feature requests on the [GitHub repository](https://github.com/chrissmartin/hass-panasonic-miraie).
+Contributions to improve the integration are welcome! Please feel free to submit pull requests or open issues for any bugs or feature requests on the [GitHub repository](https://github.com/meghadeep-com/hass-panasonic-miraie).
+
+This fork is maintained by [@meghadeep-com](https://github.com/meghadeep-com). Original work by [@chrissmartin](https://github.com/chrissmartin).
 
 ## License
 

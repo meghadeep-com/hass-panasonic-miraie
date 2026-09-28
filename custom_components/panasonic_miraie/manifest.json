@@ -2,7 +2,6 @@
   "domain": "panasonic_miraie",
   "name": "Panasonic MirAIe",
   "codeowners": [
-    "@chrissmartin",
     "@meghadeep-com"
   ],
   "config_flow": true,
