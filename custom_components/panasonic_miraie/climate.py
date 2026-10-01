@@ -141,11 +141,6 @@ class PanasonicMirAIeClimate(ClimateEntity):
     _attr_swing_horizontal_modes = list(SWING_POSITION_MAP)
     _attr_preset_modes = list(PRESET_MODES.keys())
     _attr_translation_key = "panasonic_miraie"
-    _update_lock = asyncio.Lock()
-    _command_lock = asyncio.Lock()
-    _last_update_success = False
-    _missed_updates = 0
-    _state_via_mqtt = {}
 
     # Converti7 mode mapping
     CONVERTI7_TO_PAYLOAD_MAP = {
@@ -187,6 +182,16 @@ class PanasonicMirAIeClimate(ClimateEntity):
         self._mqtt_state_received_after_command = False
         self._command_time = 0
         self._attr_preset_mode = PRESET_NONE
+
+        # These must be per-instance: every AC shares the same class otherwise,
+        # and a single shared update lock made three of the four ACs skip their
+        # periodic REST refresh each cycle (whichever lost the race), leaving
+        # them on stale MQTT state until the device next published a change.
+        self._update_lock = asyncio.Lock()
+        self._command_lock = asyncio.Lock()
+        self._last_update_success = False
+        self._missed_updates = 0
+        self._state_via_mqtt = {}
 
         # Initialize entity attributes
         self._attr_extra_state_attributes = {
@@ -413,8 +418,13 @@ class PanasonicMirAIeClimate(ClimateEntity):
                     self._mqtt_state_received_after_command = True
                     _LOGGER.debug("Received MQTT update after command")
 
+            # Honour the device's reported online status: an offline unit must
+            # go unavailable rather than keep showing its last values as if live.
+            # Only flip to unavailable on an explicit "not online" — a payload
+            # that omits onlineStatus leaves availability untouched here.
             online_status = payload.get("onlineStatus")
-            self._attr_available = online_status == "true"
+            if online_status is not None:
+                self._attr_available = online_status == "true"
 
             rmtmp = payload.get("rmtmp")
             self._attr_current_temperature = float(rmtmp) if rmtmp is not None else None
@@ -465,8 +475,9 @@ class PanasonicMirAIeClimate(ClimateEntity):
                 }
             )
 
-            # Mark entity as available as we received a valid state update
-            self._attr_available = True
+            # A valid state update means the integration is reachable; clear the
+            # missed-update counter. Availability itself follows onlineStatus
+            # (handled above), so a reachable-but-offline unit stays unavailable.
             self._missed_updates = 0
 
             # Update the state in Home Assistant

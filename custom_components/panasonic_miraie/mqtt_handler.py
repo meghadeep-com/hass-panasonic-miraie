@@ -173,17 +173,15 @@ class MQTTHandler:
         if not self.connected.is_set() and not self._pending_reconnect:
             _LOGGER.info("Connection monitor detected disconnected state, reconnecting")
             await self.connect_with_retry(self.username, self.password)
-        elif self.connected.is_set():
-            # Check if connection is stale (no message received for a while)
-            connection_age = time.time() - self._last_message_time
-            stale_threshold = MQTT_KEEPALIVE * 1.5
 
-            if connection_age > stale_threshold:
-                _LOGGER.warning(
-                    "MQTT connection may be stale (no activity for %d seconds), reconnecting",
-                    connection_age,
-                )
-                await self._handle_graceful_reconnect()
+        # Note: we deliberately do NOT reconnect just because no application
+        # message has arrived recently. MirAIe devices only publish to /state
+        # when something changes, so an idle house is silent for long stretches
+        # and a "no message in 45s = stale" rule reconnected every minute
+        # forever, churning the socket and dropping messages. Liveness is
+        # instead guaranteed by the protocol-level keepalive (keepalive=
+        # MQTT_KEEPALIVE passed to the client): a genuinely dead socket surfaces
+        # as an MqttError in _message_loop, which triggers a reconnect there.
 
     async def _handle_graceful_reconnect(self) -> None:
         """Handle a reconnection with proper cleanup."""
